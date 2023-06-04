@@ -2,15 +2,12 @@ package utils
 
 import (
 	"encoding/base64"
-	"fmt"
+	"math/big"
 )
 
-func ConvertToBase64(id string) (string, error) {
+func ConvertToBase64(id int64) (string, error) {
+	
+	eb := big.NewInt(id)
 
-	// also add a check for checking if the url is valid or not
-
-	if len(id) == 0 {
-		return "", fmt.Errorf("Given String is not a valid string")
-	}
-	return base64.StdEncoding.EncodeToString([]byte(id)), nil
+	return base64.RawURLEncoding.EncodeToString(eb.Bytes()), nil
 }

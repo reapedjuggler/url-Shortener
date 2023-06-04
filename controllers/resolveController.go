@@ -35,7 +35,6 @@ func Resolve(ctx *gin.Context) { // resolving a url
 	loginUrl := val // "httsp://www.google.com/"
 
 	// rdirect it here
-
-	ctx.Redirect(http.StatusFound, loginUrl)
+	ctx.Redirect(http.StatusOK, loginUrl)
 
 }

@@ -19,7 +19,9 @@ func main() {
 
 	// fmt.Println(pong, "pong", err)
 	router := gin.Default()
+
 	router.GET("/resolve", controllers.Resolve)
+	router.POST("/shorten", controllers.Shorten)
 
 	router.Run("localhost:3000")
 
