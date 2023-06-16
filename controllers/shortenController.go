@@ -16,6 +16,7 @@ var redisCtx = context.Background()
 
 type Url struct {
 	Urls string `json:"urls"`
+	// Name string `json:"name"`
 }
 
 func (i *Url) MarshalBinary() ([]byte, error) {
@@ -28,7 +29,7 @@ func Shorten(ctx *gin.Context) {
 		fmt.Print(err)
 		return
 	}
-
+	fmt.Println(urls.Urls)
 	var client *redis.Client = utils.GetClient()
 	nextId, err := client.Get("nextId").Result()
 	if err == redis.Nil {
@@ -40,15 +41,20 @@ func Shorten(ctx *gin.Context) {
 
 	fmt.Println(nextId, " ->sad ", nextIdInt)
 	base64Encoded, err := utils.ConvertToBase64(nextIdInt)
-
+	fmt.Println(base64Encoded)
 	val, err := client.Get(base64Encoded).Result()
 	fmt.Println(val, " ", "val0")
-	if err != nil {
-		panic(err)
+	if err != redis.Nil {
+		fmt.Println(err, " err")
+		panic("URL already exists in the database")
 	}
-	status := client.Set(base64Encoded, urls, 0).Err()
-	client.Set("nextId", nextIdInt+1, 0)
-	fmt.Print("status \n", status)
+	// urlsMarshalled, err := json.Marshal(urls.Urls)
+	// fmt.Println((urlsMarshalled))
+	// fmt.Println(json.Unmarshal(urlsMarshalled, urls), "urlsUnmarshalled")
+	status := client.Set(base64Encoded, urls.Urls, 0)
+	fmt.Println(status)
+	// client.Set("nextId", nextIdInt+1, 0)
+	// fmt.Print("status \n", status)
 
 	ctx.JSON(http.StatusAccepted, urls)
 }
