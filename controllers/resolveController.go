@@ -21,8 +21,6 @@ func Resolve(ctx *gin.Context) { // resolving a url
 
 	var client *redis.Client = utils.GetClient()
 
-	// fmt.Println("code\n", code, " -> \n sad", code1)
-
 	val, err := client.Get(code).Result()
 
 	if err != nil {
@@ -32,10 +30,7 @@ func Resolve(ctx *gin.Context) { // resolving a url
 
 	fmt.Println(val, "\nval")
 
-	loginUrl := val // "httsp://www.google.com/"
-
+	loginUrl := val // "https://www.google.com/"
 	// rdirect it here
-
-	ctx.Redirect(http.StatusFound, loginUrl)
-
+	ctx.Redirect(http.StatusOK, loginUrl)
 }
