@@ -13,16 +13,8 @@ type ResolvedRequest struct {
 	ActualUrl string `json:"actualUrl"`
 }
 
-func Resolve(ctx *gin.Context) { // resolving a url
-	// ctx.JSON(http.StatusAccepted, "fuck world")
-
-	// code, _ := ctx.Params.Get("shorturl")
-
+func Resolve(ctx *gin.Context) {
 	code := ctx.Request.URL.Query().Get("shorturl")
-
-	// write the logic to find the corresponding original
-	// url and reirect it
-
 	var client *redis.Client = utils.GetClient()
 
 	val, err := client.Get(code).Result()

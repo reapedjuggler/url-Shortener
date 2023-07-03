@@ -7,6 +7,7 @@ import (
 )
 
 const randomChar string = "_*"
+const URL_ALREADY_EXIST = "URL already exists"
 
 func ConvertToBase64(id int64) (string, error) {
 	eb := big.NewInt(id)
