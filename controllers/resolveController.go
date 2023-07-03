@@ -9,6 +9,10 @@ import (
 	"github.com/go-redis/redis"
 )
 
+type ResolvedRequest struct {
+	ActualUrl string `json:"actualUrl"`
+}
+
 func Resolve(ctx *gin.Context) { // resolving a url
 	// ctx.JSON(http.StatusAccepted, "fuck world")
 
@@ -29,8 +33,5 @@ func Resolve(ctx *gin.Context) { // resolving a url
 	}
 
 	fmt.Println(val, "\nval")
-
-	loginUrl := val // "https://www.google.com/"
-	// rdirect it here
-	ctx.Redirect(http.StatusOK, loginUrl)
+	ctx.JSON(200, ResolvedRequest{ActualUrl: val})
 }
