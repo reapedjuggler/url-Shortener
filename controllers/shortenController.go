@@ -60,5 +60,6 @@ func Shorten(ctx *gin.Context) {
 	status := client.Set(shorturl, urls.Urls, 3600*1e9)
 	log.Print(status)
 	client.Set("nextid", nextidint+1, 0)
+	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl
 	ctx.JSON(http.StatusAccepted, "Here is your shoterened URL: "+shorturl)
 }
