@@ -12,7 +12,6 @@ func InitRedis() {
 		Password: "",
 		DB:       0,
 	})
-
 }
 
 func GetClient() *redis.Client {

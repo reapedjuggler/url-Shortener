@@ -1,31 +1,64 @@
 package controllers
 
 import (
-	"io"
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
 	"reapedjuggler/url-shortener/utils"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 )
 
-func Shorten (ctx *gin.Context) {
+var redisctx = context.Background()
 
-	// recieves a url from 
+type url struct {
+	Urls string `form:"urls"`
+}
 
-	data, err := io.ReadAll(ctx.Request.Body)
+type ErrorMessage struct {
+	Message    string
+	StatusCode int
+}
 
-	if err != nil {
-		shortUrl, errFromUtil := utils.ConvertToBase64(string(data))
-		
-		if errFromUtil != nil {
+func (i *url) marshalbinary() ([]byte, error) {
+	return json.Marshal(i)
+}
+func Shorten(ctx *gin.Context) {
+	// recieves a url from
+	urls := &url{}
+	if err := ctx.ShouldBind(urls); err != nil {
+		ctx.String(http.StatusBadRequest, "bad request: %v", err)
+		return
+	}
+	log.Print(ctx.ContentType(), " Content-Type")
+	log.Print(urls, " Inside the shorten controller")
 
-			// save in redis
-
-		} else {
-			panic(errFromUtil)
-		}
-
-	} else {
-		panic(err)
+	var client *redis.Client = utils.GetClient()
+	nextid, err := client.Get("nextid").Result()
+	if err == redis.Nil {
+		client.Set("nextId", 1, 0)
+		nextid = "1"
 	}
 
+	nextidint, err := strconv.ParseInt(nextid, 10, 64)
+	base64encoded, err := utils.ConvertToBase64(nextidint)
+	log.Print(base64encoded)
+	_, err = client.Get(urls.Urls).Result()
+
+	if err != redis.Nil {
+		fmt.Println(err, " err")
+		ctx.JSON(http.StatusBadRequest, ErrorMessage{"URL already exists", 400})
+		panic("url already exists in the database")
+	}
+
+	shorturl := base64encoded
+	shorturl = utils.CompleteShortUrl(shorturl)
+	status := client.Set(shorturl, urls.Urls, 3600*1e9)
+	log.Print(status)
+	client.Set("nextid", nextidint+1, 0)
+	ctx.JSON(http.StatusAccepted, "Here is your shoterened URL: "+shorturl)
 }

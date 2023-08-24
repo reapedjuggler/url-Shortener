@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"reapedjuggler/url-shortener/utils"
 
@@ -9,19 +10,13 @@ import (
 	"github.com/go-redis/redis"
 )
 
-func Resolve(ctx *gin.Context) { // resolving a url
-	// ctx.JSON(http.StatusAccepted, "fuck world")
+type ResolvedRequest struct {
+	ActualUrl string `json:"actualUrl"`
+}
 
-	// code, _ := ctx.Params.Get("shorturl")
-
+func Resolve(ctx *gin.Context) {
 	code := ctx.Request.URL.Query().Get("shorturl")
-
-	// write the logic to find the corresponding original
-	// url and reirect it
-
 	var client *redis.Client = utils.GetClient()
-
-	// fmt.Println("code\n", code, " -> \n sad", code1)
 
 	val, err := client.Get(code).Result()
 
@@ -29,13 +24,8 @@ func Resolve(ctx *gin.Context) { // resolving a url
 		fmt.Println(err)
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
 	}
-
+	log.Print(val, " Corresponding Resolved URL")
 	fmt.Println(val, "\nval")
-
-	loginUrl := val // "httsp://www.google.com/"
-
-	// rdirect it here
-
-	ctx.Redirect(http.StatusFound, loginUrl)
-
+	ctx.Redirect(http.StatusMovedPermanently, val)
+	ctx.JSON(200, ResolvedRequest{ActualUrl: val})
 }
