@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"reapedjuggler/url-shortener/utils"
 	"strconv"
-
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -17,12 +16,12 @@ import (
 var redisctx = context.Background()
 
 type url struct {
-	Urls string `json:"urls"`
+	Urls string `form:"urls"`
 }
 
 type ErrorMessage struct {
-	Message    string `json: "Message"`
-	StatusCode int    `json: "StatusCode"`
+	Message    string
+	StatusCode int
 }
 
 func (i *url) marshalbinary() ([]byte, error) {
@@ -31,17 +30,17 @@ func (i *url) marshalbinary() ([]byte, error) {
 func Shorten(ctx *gin.Context) {
 	// recieves a url from
 	urls := &url{}
-	if err := ctx.ShouldBindJSON(&urls); err != nil {
-		fmt.Print(err)
+	if err := ctx.ShouldBind(urls); err != nil {
+		ctx.String(http.StatusBadRequest, "bad request: %v", err)
 		return
 	}
-	log.Print(urls)
+	log.Print(ctx.ContentType(), " Content-Type")
+	log.Print(urls, " Inside the shorten controller")
 
 	var client *redis.Client = utils.GetClient()
 	nextid, err := client.Get("nextid").Result()
 	if err == redis.Nil {
-		fmt.Println("inside redis empty")
-		client.Set("nextid", 1, 0)
+		client.Set("nextId", 1, 0)
 		nextid = "1"
 	}
 
@@ -52,13 +51,14 @@ func Shorten(ctx *gin.Context) {
 
 	if err != redis.Nil {
 		fmt.Println(err, " err")
+		ctx.JSON(http.StatusBadRequest, ErrorMessage{"URL already exists", 400})
 		panic("url already exists in the database")
 	}
 
 	shorturl := base64encoded
 	shorturl = utils.CompleteShortUrl(shorturl)
-	status := client.Set(shorturl, urls.Urls, 3600 * 1e9)
+	status := client.Set(shorturl, urls.Urls, 3600*1e9)
 	log.Print(status)
 	client.Set("nextid", nextidint+1, 0)
-	ctx.JSON(http.StatusAccepted, urls)
+	ctx.JSON(http.StatusAccepted, "Here is your shoterened URL: "+shorturl)
 }

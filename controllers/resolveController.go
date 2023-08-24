@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"reapedjuggler/url-shortener/utils"
 
@@ -23,7 +24,8 @@ func Resolve(ctx *gin.Context) {
 		fmt.Println(err)
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
 	}
-
+	log.Print(val, " Corresponding Resolved URL")
 	fmt.Println(val, "\nval")
+	ctx.Redirect(http.StatusMovedPermanently, val)
 	ctx.JSON(200, ResolvedRequest{ActualUrl: val})
 }
