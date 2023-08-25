@@ -3,15 +3,12 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	urlParser "net/url"
-	"reapedjuggler/url-shortener/utils"
-	"strconv"
+	"reapedjuggler/url-shortener/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis"
 )
 
 var redisctx = context.Background()
@@ -44,29 +41,10 @@ func Shorten(ctx *gin.Context) {
 	log.Print(ctx.ContentType(), " Content-Type")
 	log.Print(urls, " Inside the shorten controller")
 
-	var client *redis.Client = utils.GetClient()
-	nextid, err := client.Get("nextid").Result()
-	if err == redis.Nil {
-		client.Set("nextId", 1, 0)
-		nextid = "1"
-	}
+	// Service call
+	serviceUrl := &services.ServiceUrl{Urls: urls.Urls}
+	shorturl := services.ShortenService(ctx, serviceUrl)
 
-	nextidint, err := strconv.ParseInt(nextid, 10, 64)
-	base64encoded, err := utils.ConvertToBase64(nextidint)
-	log.Print(base64encoded)
-	_, err = client.Get(urls.Urls).Result()
-
-	if err != redis.Nil {
-		fmt.Println(err, " err")
-		ctx.JSON(http.StatusBadRequest, ErrorMessage{"URL already exists", 400})
-		panic("url already exists in the database")
-	}
-
-	shorturl := base64encoded
-	shorturl = utils.CompleteShortUrl(shorturl)
-	status := client.Set(shorturl, urls.Urls, 3600*1e9)
-	log.Print(status)
-	client.Set("nextid", nextidint+1, 0)
 	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl
 	ctx.JSON(http.StatusAccepted, "Here is your shoterened URL: "+shorturl)
 }
