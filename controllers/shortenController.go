@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	urlParser "net/url"
 	"reapedjuggler/url-shortener/utils"
 	"strconv"
 
@@ -34,6 +35,12 @@ func Shorten(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "bad request: %v", err)
 		return
 	}
+	_, err := urlParser.ParseRequestURI(urls.Urls)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorMessage{"Invalid URL", 400})
+		return
+	}
+
 	log.Print(ctx.ContentType(), " Content-Type")
 	log.Print(urls, " Inside the shorten controller")
 
