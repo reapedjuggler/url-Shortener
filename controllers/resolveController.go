@@ -17,15 +17,18 @@ type ResolvedRequest struct {
 func Resolve(ctx *gin.Context) {
 	code := ctx.Request.URL.Query().Get("shorturl")
 	var client *redis.Client = utils.GetClient()
-
+	log.Print(code, " code")
 	val, err := client.Get(code).Result()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, " err")
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
+		return
 	}
+	// Cache lookup
 	log.Print(val, " Corresponding Resolved URL")
 	fmt.Println(val, "\nval")
 	ctx.Redirect(http.StatusMovedPermanently, val)
-	ctx.JSON(200, ResolvedRequest{ActualUrl: val})
+
+	// We need to a db lookup 
 }

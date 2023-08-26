@@ -44,7 +44,5 @@ func ShortenController(ctx *gin.Context) {
 	// Service call
 	serviceUrl := &services.ServiceUrl{Urls: urls.Urls, LongUrl: urls.Urls}
 	shorturl := services.ShortenService(ctx, serviceUrl)
-
-	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl
 	ctx.JSON(http.StatusAccepted, "Here is your shoterened URL: "+shorturl)
 }

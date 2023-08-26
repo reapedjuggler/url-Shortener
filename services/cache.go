@@ -25,12 +25,12 @@ type ErrorMessage struct {
 
 func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	var client *redis.Client = utils.GetClient()
-	log.Print("Getting mongodb connection")
+	// log.Print("Getting mongodb connection")
 	var mongoClient *mongo.Client = utils.GetMongoClient()
 
 	nextid, err := client.Get("nextid").Result()
 	if err == redis.Nil {
-		client.Set("nextId", 1, 0)
+		log.Print(err, " err in service")
 		nextid = "1"
 	}
 
@@ -50,18 +50,31 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 
 	// Caching starts here
 	// Enter into cache first and then into mongodb first so that consistency is there in cache and mongodb
-	status := client.Set(shorturl, urls.Urls, 3600*1e9)
-	log.Print(status)
-	client.Set("nextid", nextidint+1, 0)
-
+	InsertIntoRedis(client, shorturl, nextidint, *urls)
 	// P.S - Study about cache policies
-	log.Print("reached the db layer ", mongoClient)
-	db := mongoClient.Database("shorturls")
+
+	// log.Print("reached the db layer ", mongoClient)
+	InsertIntoMongodb(mongoClient, shorturl, urls)
+	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl
+	return shorturl
+}
+
+func InsertIntoRedis(redisClient *redis.Client, shorturl string, nextIdInt int64, urls ServiceUrl) {
+	status := redisClient.Set(shorturl, urls.Urls, 3600*1e9)
+	log.Print(status)
+	redisClient.Set("nextid", nextIdInt+1, 0)
+}
+
+func InsertIntoMongodb(mongoClient *mongo.Client, shorturl string, urls *ServiceUrl) {
+	db := mongoClient.Database(utils.GetKeyFromEnv(utils.DatabaseName))
 	log.Print(db, " db")
-	coll := db.Collection("shorturls")
-	log.Print(coll, " coll")
+	coll := db.Collection(utils.GetKeyFromEnv(utils.CollectionName))
+	// log.Print(coll, " coll")
 	doc := ServiceUrl{Urls: shorturl, LongUrl: urls.Urls}
 	result, err := coll.InsertOne(context.TODO(), doc)
-	log.Printf("Inserted document with _id: %v\n", result)
-	return shorturl
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Printf("Inserted document with _id: %v\n", result)
+	}
 }

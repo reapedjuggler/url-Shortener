@@ -12,11 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *redis.Client = nil
+var redisClient *redis.Client = nil
 var mongoClient *mongo.Client = nil
 
+const CollectionName = "CollectionName"
+const MONGODB_URI = "MONGODB_URI"
+const DatabaseName = "DatabaseName"
+
 func InitRedis() {
-	client = redis.NewClient(&redis.Options{
+	redisClient = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
@@ -39,10 +43,10 @@ func InitMongodb() {
 }
 
 func GetClient() *redis.Client {
-	if client == nil {
+	if redisClient == nil {
 		InitRedis()
 	}
-	return client
+	return redisClient
 }
 
 func GetKeyFromEnv(key string) string {
@@ -56,7 +60,7 @@ func GoDotEnvVariable() {
 	if err != nil {
 		log.Fatalf("Error loading .env file ", err)
 	}
-	log.Print(os.Getenv("MONGODB_URI"))
+	// log.Print(os.Getenv("MONGODB_URI"))
 }
 
 func GetMongoClient() *mongo.Client {
