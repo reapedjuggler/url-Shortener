@@ -14,7 +14,8 @@ import (
 )
 
 type ServiceUrl struct {
-	Urls string
+	Urls    string
+	LongUrl string
 }
 
 type ErrorMessage struct {
@@ -48,15 +49,18 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	shorturl = utils.CompleteShortUrl(shorturl)
 
 	// Caching starts here
-	// status := client.Set(shorturl, urls.Urls, 3600*1e9)
-	// log.Print(status)
-	// client.Set("nextid", nextidint+1, 0)
-
 	// Enter into cache first and then into mongodb first so that consistency is there in cache and mongodb
+	status := client.Set(shorturl, urls.Urls, 3600*1e9)
+	log.Print(status)
+	client.Set("nextid", nextidint+1, 0)
+
 	// P.S - Study about cache policies
-	log.Print("reached the db layer")
-	coll := mongoClient.Database("shorturls").Collection("shortUrls")
-	doc := ServiceUrl{Urls: shorturl}
+	log.Print("reached the db layer ", mongoClient)
+	db := mongoClient.Database("shorturls")
+	log.Print(db, " db")
+	coll := db.Collection("shorturls")
+	log.Print(coll, " coll")
+	doc := ServiceUrl{Urls: shorturl, LongUrl: urls.Urls}
 	result, err := coll.InsertOne(context.TODO(), doc)
 	log.Printf("Inserted document with _id: %v\n", result)
 	return shorturl

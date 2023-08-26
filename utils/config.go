@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -25,7 +24,7 @@ func InitRedis() {
 }
 
 func InitMongodb() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(GetKeyFromEnv("MONGO_URI")))
+	client, err := mongo.NewClient(options.Client().ApplyURI(GetKeyFromEnv("MONGODB_URI")))
 	log.Print(client, " . ", " client ")
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +34,8 @@ func InitMongodb() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(ctx)
+	mongoClient = client
+	// defer client.Disconnect(ctx)
 }
 
 func GetClient() *redis.Client {
@@ -51,13 +51,12 @@ func GetKeyFromEnv(key string) string {
 
 // Basically this function will bind the variables into os from env file
 func GoDotEnvVariable() {
-	// load .env file
 	log.Print("Loading the .env file")
-	err := godotenv.Load(filepath.Join(path_dir, ".env"))
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file ", err)
 	}
-	log.Print()
+	log.Print(os.Getenv("MONGODB_URI"))
 }
 
 func GetMongoClient() *mongo.Client {

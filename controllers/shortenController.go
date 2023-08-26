@@ -25,7 +25,7 @@ type ErrorMessage struct {
 func (i *url) marshalbinary() ([]byte, error) {
 	return json.Marshal(i)
 }
-func Shorten(ctx *gin.Context) {
+func ShortenController(ctx *gin.Context) {
 	// recieves a url from
 	urls := &url{}
 	if err := ctx.ShouldBind(urls); err != nil {
@@ -42,7 +42,7 @@ func Shorten(ctx *gin.Context) {
 	log.Print(urls, " Inside the shorten controller")
 
 	// Service call
-	serviceUrl := &services.ServiceUrl{Urls: urls.Urls}
+	serviceUrl := &services.ServiceUrl{Urls: urls.Urls, LongUrl: urls.Urls}
 	shorturl := services.ShortenService(ctx, serviceUrl)
 
 	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl

@@ -16,7 +16,7 @@ func main() {
 	utils.GoDotEnvVariable()
 
 	router.GET("/resolve", controllers.Resolve)
-	router.POST("/shorten", controllers.Shorten)
+	router.POST("/shorten", controllers.ShortenController)
 
 	router.Run("localhost:3000")
 }
