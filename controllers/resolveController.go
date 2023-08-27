@@ -48,6 +48,11 @@ func Resolve(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
 		panic(err)
 	}
+
 	log.Print(correspondingUrl, " correspondingUrl")
 	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
+
+
+	// Add in the cache as well, I think this should be done by a goroutine
+	
 }
