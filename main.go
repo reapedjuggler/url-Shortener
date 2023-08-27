@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// Jai Shree Ram, Jai Hanuman ji
 	fmt.Println("Testing Golang Redis")
 	router := gin.Default()
 	router.Use(static.Serve("/", static.LocalFile("./views", true)))

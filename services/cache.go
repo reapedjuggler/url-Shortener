@@ -73,7 +73,6 @@ func InsertIntoMongodb(mongoClient *mongo.Client, shorturl string, urls *Service
 	doc := ServiceUrl{Urls: shorturl, LongUrl: urls.Urls}
 	result, err := coll.InsertOne(context.TODO(), doc)
 	if err != nil {
-		log.Fatal(err)
 	} else {
 		log.Printf("Inserted document with _id: %v\n", result)
 	}
