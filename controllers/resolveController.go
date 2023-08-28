@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"reapedjuggler/url-shortener/services"
 	"reapedjuggler/url-shortener/utils"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +32,9 @@ func Resolve(ctx *gin.Context) {
 
 	// Cache lookup
 	if err == nil {
+		log.Print("Found in cache")
 		log.Print(val, " Corresponding Resolved URL")
+		ctx.Redirect(http.StatusMovedPermanently, val)
 		return
 	}
 
@@ -43,16 +46,16 @@ func Resolve(ctx *gin.Context) {
 	coll := db.Collection(utils.GetKeyFromEnv(utils.CollectionName))
 	filter := bson.D{{Key: "urls", Value: code}}
 	var correspondingUrl ResultFromMongoDB = ResultFromMongoDB{}
+
 	errFromFindOne := coll.FindOne(context.TODO(), filter).Decode(&correspondingUrl)
 	if errFromFindOne != nil {
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
 		panic(err)
 	}
 
-	log.Print(correspondingUrl, " correspondingUrl")
-	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
-
-
 	// Add in the cache as well, I think this should be done by a goroutine
-	
+	log.Print(correspondingUrl, " correspondingUrl")
+	go services.InsertIntoRedisWithoutNextId(client, code, services.ServiceUrl{Urls: code, LongUrl: correspondingUrl.Longurl})
+
+	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
 }

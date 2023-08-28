@@ -59,10 +59,17 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	return shorturl
 }
 
-func InsertIntoRedis(redisClient *redis.Client, shorturl string, nextIdInt int64, urls ServiceUrl) {
+func InsertIntoRedis(redisClient *redis.Client, shorturl string, nextIdInt int64, urls ServiceUrl) *redis.StatusCmd {
 	status := redisClient.Set(shorturl, urls.Urls, 3600*1e9)
 	log.Print(status)
 	redisClient.Set("nextid", nextIdInt+1, 0)
+	return status
+}
+
+func InsertIntoRedisWithoutNextId(redisClient *redis.Client, shorturl string, urls ServiceUrl) *redis.StatusCmd {
+	status := redisClient.Set(shorturl, urls.Urls, 3600*1e9)
+	log.Print(status)
+	return status
 }
 
 func InsertIntoMongodb(mongoClient *mongo.Client, shorturl string, urls *ServiceUrl) {
