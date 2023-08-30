@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	urlParser "net/url"
@@ -10,8 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var redisctx = context.Background()
 
 type url struct {
 	Urls string `form:"urls"`
@@ -22,9 +18,6 @@ type ErrorMessage struct {
 	StatusCode int
 }
 
-func (i *url) marshalbinary() ([]byte, error) {
-	return json.Marshal(i)
-}
 func ShortenController(ctx *gin.Context) {
 	// recieves a url from
 	urls := &url{}

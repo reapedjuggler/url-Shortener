@@ -18,10 +18,9 @@ type ResolvedRequest struct {
 }
 
 type ResultFromMongoDB struct {
-	Urls    string `json:"urls" bson:"urls"`
-	Longurl string `json:"longurl" bson:"longurl"`
-	// _id     ObjectId `json:"bson_id" bson:"_id,omitempty"`
-	Id primitive.ObjectID `bson:"_id" json:"id"`
+	Urls    string             `json:"urls" bson:"urls"`
+	Longurl string             `json:"longurl" bson:"longurl"`
+	Id      primitive.ObjectID `bson:"_id" json:"id"`
 }
 
 func Resolve(ctx *gin.Context) {
@@ -54,8 +53,12 @@ func Resolve(ctx *gin.Context) {
 	}
 
 	// Add in the cache as well, I think this should be done by a goroutine
+	// And yes it will be done by it, cause we don't care even if it fails, as we already persisted it
 	log.Print(correspondingUrl, " correspondingUrl")
-	go services.InsertIntoRedisWithoutNextId(client, code, services.ServiceUrl{Urls: code, LongUrl: correspondingUrl.Longurl})
 
+	// Read about this, aisa to nahi ho raha ki before inserting into redis y program exit kar ja raha hai
+	// Answer: It won't because we are already listening on a server and hence the main file is never existing.
+	// Even though just add a wait group just for learning.
+	go services.InsertIntoRedisWithoutNextId(client, code, services.ServiceUrl{Urls: code, LongUrl: correspondingUrl.Longurl})
 	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
 }

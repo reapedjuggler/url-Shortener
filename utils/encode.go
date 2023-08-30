@@ -9,9 +9,9 @@ import (
 const randomChar string = "_*"
 const URL_ALREADY_EXIST = "URL already exists"
 
-func ConvertToBase64(id int64) (string, error) {
+func ConvertToBase64(id int64) string {
 	eb := big.NewInt(id)
-	return base64.RawURLEncoding.EncodeToString(eb.Bytes()), nil
+	return base64.RawURLEncoding.EncodeToString(eb.Bytes())
 }
 
 func CompleteShortUrl(shortUrl string) string {
