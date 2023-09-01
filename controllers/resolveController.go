@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reapedjuggler/url-shortener/services"
 	"reapedjuggler/url-shortener/utils"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -26,6 +27,7 @@ type ResultFromMongoDB struct {
 func Resolve(ctx *gin.Context) {
 	code := ctx.Request.URL.Query().Get("shorturl")
 	var client *redis.Client = utils.GetClient()
+	var wg *sync.WaitGroup = &sync.WaitGroup{}
 	log.Print(code, " code")
 	val, err := client.Get(code).Result()
 
@@ -34,6 +36,8 @@ func Resolve(ctx *gin.Context) {
 		log.Print("Found in cache")
 		log.Print(val, " Corresponding Resolved URL")
 		ctx.Redirect(http.StatusMovedPermanently, val)
+		// ctx.JSON(http.StatusAccepted, "Resolved")
+		log.Print("Redirected")
 		return
 	}
 
@@ -49,7 +53,7 @@ func Resolve(ctx *gin.Context) {
 	errFromFindOne := coll.FindOne(context.TODO(), filter).Decode(&correspondingUrl)
 	if errFromFindOne != nil {
 		ctx.JSON(http.StatusNotFound, "The given short url is invalid")
-		panic(err)
+		panic(errFromFindOne)
 	}
 
 	// Add in the cache as well, I think this should be done by a goroutine
@@ -59,6 +63,23 @@ func Resolve(ctx *gin.Context) {
 	// Read about this, aisa to nahi ho raha ki before inserting into redis y program exit kar ja raha hai
 	// Answer: It won't because we are already listening on a server and hence the main file is never existing.
 	// Even though just add a wait group just for learning.
-	go services.InsertIntoRedisWithoutNextId(client, code, services.ServiceUrl{Urls: code, LongUrl: correspondingUrl.Longurl})
+	wg.Add(1)
+	go services.InsertIntoRedisWithoutNextId(client, code, services.ServiceUrl{Urls: code, LongUrl: correspondingUrl.Longurl}, wg)
+
+	// ctx.JSON(http.StatusAccepted, "Resolved")
 	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
+
+	// ToDo:
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
+	// Rate Limit it
 }
