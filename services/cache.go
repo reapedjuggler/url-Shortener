@@ -2,11 +2,13 @@ package services
 
 import (
 	"context"
-	"fmt"
+
+	// "fmt"
 	"log"
 	"net/http"
 	"reapedjuggler/url-shortener/utils"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -25,11 +27,10 @@ type ErrorMessage struct {
 
 func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	var redisClient *redis.Client = utils.GetClient()
-	// log.Print("Getting mongodb connection")
 	var mongoClient *mongo.Client = utils.GetMongoClient()
-
 	nextid, err := redisClient.Get("nextid").Result()
-	if err == redis.Nil {
+
+	if err == redis.Nil || nextid == "0" {
 		log.Print(err, " err in service")
 		nextid = "1"
 	}
@@ -40,7 +41,7 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	_, err = redisClient.Get(base64encoded).Result()
 
 	if err != redis.Nil {
-		fmt.Println(err, " err")
+		// fmt.Println(err, " err")
 		ctx.JSON(http.StatusBadRequest, ErrorMessage{"URL already exists", 400})
 		panic(err)
 	}
@@ -57,6 +58,7 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	_, err = InsertIntoMongodb(mongoClient, shorturl, urls)
 	if err != nil {
 		// Internal server error;
+		// log.Print(err, " err in removing from redis")
 		removeFromRedis(redisClient, shorturl)
 		ctx.JSON(http.StatusInternalServerError, ErrorMessage{"Internal server error", 500})
 	}
@@ -71,9 +73,10 @@ func InsertIntoRedis(redisClient *redis.Client, shorturl string, nextIdInt int64
 	return status
 }
 
-func InsertIntoRedisWithoutNextId(redisClient *redis.Client, shorturl string, urls ServiceUrl) *redis.StatusCmd {
-	status := redisClient.Set(shorturl, urls.Urls, 3600*1e9)
-	log.Print(status)
+func InsertIntoRedisWithoutNextId(redisClient *redis.Client, shorturl string, urls ServiceUrl, wg *sync.WaitGroup) *redis.StatusCmd {
+	defer wg.Done()
+	status := redisClient.Set(shorturl, urls.LongUrl, 3600*1e9)
+	log.Print(status, " Completed the go routine for inserting into redis")
 	return status
 }
 
