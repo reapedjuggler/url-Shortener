@@ -25,10 +25,11 @@ type ResultFromMongoDB struct {
 }
 
 func Resolve(ctx *gin.Context) {
-	code := ctx.Request.URL.Query().Get("shorturl")
+	// code := ctx.Request.URL.Query().Get("shorturl")
+	code := ctx.Request.URL.Path[1:]
+	log.Print(code, " path params")
 	var client *redis.Client = utils.GetClient()
 	var wg *sync.WaitGroup = &sync.WaitGroup{}
-	log.Print(code, " code")
 	val, err := client.Get(code).Result()
 
 	// Cache lookup
@@ -68,18 +69,4 @@ func Resolve(ctx *gin.Context) {
 
 	// ctx.JSON(http.StatusAccepted, "Resolved")
 	ctx.Redirect(http.StatusMovedPermanently, correspondingUrl.Longurl)
-
-	// ToDo:
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
-	// Rate Limit it
 }

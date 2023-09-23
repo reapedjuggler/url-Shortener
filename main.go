@@ -19,7 +19,7 @@ func main() {
 	router.Use()
 	router.Use(static.Serve("/", static.LocalFile("./views", true)))
 	utils.GoDotEnvVariable()
-	router.GET("/resolve", controllers.Resolve)
+	router.GET("/:resolve", controllers.Resolve)
 	router.POST("/shorten", controllers.ShortenController)
 
 	router.Run("localhost:3000")
