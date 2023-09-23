@@ -30,7 +30,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		log.Println("contextKey: ", contextKey)
 		ctx, err := limiter.Get(c, contextKey)
 		if err != nil {
-			// Handle the error (e.g., log it)
+			// Handle the error (e.g., log it) 
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			c.Abort()
 			return
