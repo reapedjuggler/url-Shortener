@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 func RateLimitMiddleware() gin.HandlerFunc {
 	// Define rate limits
 	rate := limiter.Rate{
-		Limit:  10,        // Maximum number of requests allowed
+		Limit:  5,         // Maximum number of requests allowed
 		Period: time.Hour, // Time period for the rate limit
 	}
 
@@ -25,7 +26,8 @@ func RateLimitMiddleware() gin.HandlerFunc {
 	// Return the Gin middleware handler
 	return func(c *gin.Context) {
 		// Use the rate limiter to check if the request is allowed
-		contextKey := "contextKey"
+		contextKey := c.ClientIP() // Use client IP as the context key
+		log.Println("contextKey: ", contextKey)
 		ctx, err := limiter.Get(c, contextKey)
 		if err != nil {
 			// Handle the error (e.g., log it)
