@@ -62,7 +62,7 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 		removeFromRedis(redisClient, shorturl)
 		ctx.JSON(http.StatusInternalServerError, ErrorMessage{"Internal server error", 500})
 	}
-	shorturl = "http://localhost:3000/resolve?shorturl=" + shorturl
+	shorturl = "http://localhost:3000/" + shorturl
 	return shorturl
 }
 
