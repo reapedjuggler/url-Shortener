@@ -1,0 +1,4 @@
+MONGODB_URI=Mongo
+CollectionName=CollectionName
+DatabaseName=databaseName
+
