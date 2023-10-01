@@ -30,9 +30,6 @@ func ShortenController(ctx *gin.Context) {
 		return
 	}
 
-	// log.Print(ctx.ContentType(), " Content-Type")
-	// log.Print(urls, " Inside the shorten controller")
-
 	// Service call
 	serviceUrl := &services.ServiceUrl{Urls: urls.Urls, LongUrl: urls.Urls}
 	shorturl := services.ShortenService(ctx, serviceUrl)

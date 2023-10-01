@@ -26,7 +26,7 @@ type ResultFromMongoDB struct {
 
 func Resolve(ctx *gin.Context) {
 	// code := ctx.Request.URL.Query().Get("shorturl")
-	code := ctx.Request.URL.Path[1:]
+	code := ctx.Param("resolve")
 	log.Print(code, " path params")
 	var client *redis.Client = utils.GetClient()
 	var wg *sync.WaitGroup = &sync.WaitGroup{}
