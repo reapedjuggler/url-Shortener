@@ -21,7 +21,7 @@ const DatabaseName = "DatabaseName"
 
 func InitRedis() {
 	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
@@ -64,7 +64,6 @@ func GoDotEnvVariable() {
 		log.Print("not loaded the .env file")
 		log.Fatalf("Error loading .env file ", err)
 	}
-	log.Print(os.Getenv("MONGODB_URI"))
 }
 
 func GetMongoClient() *mongo.Client {

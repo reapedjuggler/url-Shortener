@@ -82,9 +82,9 @@ func InsertIntoRedisWithoutNextId(redisClient *redis.Client, shorturl string, ur
 
 func InsertIntoMongodb(mongoClient *mongo.Client, shorturl string, urls *ServiceUrl) (bool, error) {
 	db := mongoClient.Database(utils.GetKeyFromEnv(utils.DatabaseName))
-	log.Print(db, " db")
+	//log.Print(db, " db")
 	coll := db.Collection(utils.GetKeyFromEnv(utils.CollectionName))
-	log.Print(coll, " coll")
+	//log.Print(coll, " coll")
 	doc := ServiceUrl{Urls: shorturl, LongUrl: urls.Urls}
 	result, err := coll.InsertOne(context.TODO(), doc)
 	if err != nil {

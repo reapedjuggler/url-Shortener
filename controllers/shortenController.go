@@ -1,11 +1,10 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	urlParser "net/url"
 	"reapedjuggler/url-shortener/services"
-
-	"github.com/gin-gonic/gin"
 )
 
 type url struct {
@@ -18,11 +17,12 @@ type ErrorMessage struct {
 }
 
 func ShortenController(ctx *gin.Context) {
-	// recieves a url from
+	// receives a url from
 	urls := &url{}
 	if err := ctx.ShouldBind(urls); err != nil {
 		ctx.String(http.StatusBadRequest, "bad request: %v", err)
 		return
+
 	}
 	_, err := urlParser.ParseRequestURI(urls.Urls)
 	if err != nil {

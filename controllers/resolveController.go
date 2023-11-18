@@ -37,7 +37,6 @@ func Resolve(ctx *gin.Context) {
 		log.Print("Found in cache")
 		// log.Print(val, " Corresponding Resolved URL")
 		ctx.Redirect(http.StatusMovedPermanently, val)
-		// ctx.JSON(http.StatusAccepted, "Resolved")
 		log.Print("Redirected")
 		return
 	}
