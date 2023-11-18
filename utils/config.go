@@ -39,12 +39,14 @@ func InitMongodb() {
 		log.Fatal(err)
 	}
 	mongoClient = client
-	// defer client.Disconnect(ctx)
+	// defer client.Disconnect(ctx)docker-compose logs redis
+
 }
 
 func GetClient() *redis.Client {
 	if redisClient == nil {
 		InitRedis()
+		log.Print("Redis client initialized successfully")
 	}
 	return redisClient
 }
@@ -55,12 +57,13 @@ func GetKeyFromEnv(key string) string {
 
 // Basically this function will bind the variables into os from env file
 func GoDotEnvVariable() {
-	log.Print("Loading the .env file")
+	// log.Print("Loading the .env file")
 	err := godotenv.Load(".env")
+	log.Print("loaded the .env file")
 	if err != nil {
+		log.Print("not loaded the .env file")
 		log.Fatalf("Error loading .env file ", err)
 	}
-	// log.Print(os.Getenv("MONGODB_URI"))
 }
 
 func GetMongoClient() *mongo.Client {

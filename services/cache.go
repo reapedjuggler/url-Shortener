@@ -58,11 +58,11 @@ func ShortenService(ctx *gin.Context, urls *ServiceUrl) string {
 	_, err = InsertIntoMongodb(mongoClient, shorturl, urls)
 	if err != nil {
 		// Internal server error;
-		// log.Print(err, " err in removing from redis")
+		log.Print(err, " err in removing from redis")
 		removeFromRedis(redisClient, shorturl)
 		ctx.JSON(http.StatusInternalServerError, ErrorMessage{"Internal server error", 500})
 	}
-	shorturl = "http://localhost:3000/" + shorturl
+	shorturl = "http://localhost:8000/resolve/" + shorturl
 	return shorturl
 }
 
@@ -82,12 +82,13 @@ func InsertIntoRedisWithoutNextId(redisClient *redis.Client, shorturl string, ur
 
 func InsertIntoMongodb(mongoClient *mongo.Client, shorturl string, urls *ServiceUrl) (bool, error) {
 	db := mongoClient.Database(utils.GetKeyFromEnv(utils.DatabaseName))
-	log.Print(db, " db")
+	//log.Print(db, " db")
 	coll := db.Collection(utils.GetKeyFromEnv(utils.CollectionName))
-	// log.Print(coll, " coll")
+	//log.Print(coll, " coll")
 	doc := ServiceUrl{Urls: shorturl, LongUrl: urls.Urls}
 	result, err := coll.InsertOne(context.TODO(), doc)
 	if err != nil {
+		log.Print(err)
 		return false, err
 	} else {
 		log.Printf("Inserted document with _id: %v\n", result)

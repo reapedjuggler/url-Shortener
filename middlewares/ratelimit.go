@@ -13,7 +13,7 @@ import (
 func RateLimitMiddleware() gin.HandlerFunc {
 	// Define rate limits
 	rate := limiter.Rate{
-		Limit:  5,         // Maximum number of requests allowed
+		Limit:  100,       // Maximum number of requests allowed
 		Period: time.Hour, // Time period for the rate limit
 	}
 
@@ -30,7 +30,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		log.Println("contextKey: ", contextKey)
 		ctx, err := limiter.Get(c, contextKey)
 		if err != nil {
-			// Handle the error (e.g., log it) 
+			// Handle the error (e.g., log it)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			c.Abort()
 			return

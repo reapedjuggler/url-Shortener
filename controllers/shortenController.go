@@ -1,11 +1,10 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	urlParser "net/url"
 	"reapedjuggler/url-shortener/services"
-
-	"github.com/gin-gonic/gin"
 )
 
 type url struct {
@@ -18,20 +17,18 @@ type ErrorMessage struct {
 }
 
 func ShortenController(ctx *gin.Context) {
-	// recieves a url from
+	// receives a url from
 	urls := &url{}
 	if err := ctx.ShouldBind(urls); err != nil {
 		ctx.String(http.StatusBadRequest, "bad request: %v", err)
 		return
+
 	}
 	_, err := urlParser.ParseRequestURI(urls.Urls)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorMessage{"Invalid URL", 400})
 		return
 	}
-
-	// log.Print(ctx.ContentType(), " Content-Type")
-	// log.Print(urls, " Inside the shorten controller")
 
 	// Service call
 	serviceUrl := &services.ServiceUrl{Urls: urls.Urls, LongUrl: urls.Urls}
